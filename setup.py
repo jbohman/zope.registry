@@ -22,12 +22,6 @@ import sys
 import os
 from setuptools import setup
 
-extra = {}
-if sys.version_info >= (3,):
-    extra['setup_requires'] = ['zope.fixers']
-    extra['use_2to3'] = True
-    extra['use_2to3_fixers'] = ['zope.fixers']
-
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
@@ -39,25 +33,12 @@ setup(
     description='Zope Component Architecture',
     author='Zope Foundation and Contributors',
     author_email='zope-dev@zope.org',
-    long_description=(
-        read('README.txt')
-        + '\n' +
-        'Detailed Documentation\n'
-        '**********************\n'
-        + '\n' +
-        read('REGISTRY.txt')
-        + '\n' +
-        read('CHANGES.txt')
-        + '\n' +
-        'Download\n'
-        '********\n'
-        ),
+    long_description=(read('README.txt')),
     packages=['zope', 'zope.registry', 'zope.registry.tests'],
     package_dir={'': 'src'},
     namespace_packages=['zope'],
     install_requires=['setuptools', 'zope.interface', 'zope.event'],
     tests_require=['setuptools', 'zope.interface', 'zope.event'],
     test_suite='zope.registry.tests',
-    zip_safe=False,
-    **extra
+    zip_safe=False
     )

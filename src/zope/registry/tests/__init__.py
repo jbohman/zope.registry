@@ -49,10 +49,14 @@ class U:
         return "%s(%s)" % (self.__class__.__name__, self.__name__)
 
 class U1(U):
-    interface.implements(I1)
+    pass
+
+U1 = interface.implementer(I1)(U1)
 
 class U12(U):
-    interface.implements(I1, I2)
+    pass
+
+U12 = interface.implementer(I1, I2)(U12)
 
 class IA1(interface.Interface):
     pass
@@ -73,28 +77,36 @@ class A:
 
 class A12_1(A):
     registry.adapts(I1, I2)
-    interface.implements(IA1)
+
+A12_1 = interface.implementer(IA1)(A12_1)
 
 class A12_(A):
     registry.adapts(I1, I2)
 
 class A_2(A):
-    interface.implements(IA2)
+    pass
+
+A_2 = interface.implementer(IA2)(A_2)
 
 class A_3(A):
-    interface.implements(IA3)
+    pass
+
+A_3 = interface.implementer(IA3)(A_3)
 
 class A1_12(U):
     registry.adapts(I1)
-    interface.implements(IA1, IA2)
+
+A1_12 = interface.implementer(IA1, IA2)(A1_12)
 
 class A1_2(U):
     registry.adapts(I1)
-    interface.implements(IA2)
+
+A1_2 = interface.implementer(IA2)(A1_2)
 
 class A1_23(U):
     registry.adapts(I1)
-    interface.implements(IA1, IA3)
+
+A1_23 = interface.implementer(IA1, IA3)(A1_23)
 
 def noop(*args):
     pass

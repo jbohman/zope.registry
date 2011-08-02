@@ -1,4 +1,12 @@
 import unittest
+import sys
+
+if sys.version_info[0] == 3:
+    def _u(s):
+        return s
+else:
+    def _u(s):
+        return unicode(s, 'unicode_escape')
 
 class Test(unittest.TestCase):
 
@@ -61,7 +69,7 @@ class Test(unittest.TestCase):
         def handle4(x):
             self.assertEqual(x, test_object1)
 
-        c1.registerHandler(handle1, info=u'First handler')
+        c1.registerHandler(handle1, info=_u('First handler'))
         c2.registerHandler(handle, required=[self.tests.U])
         c3.registerHandler(handle3)
         c4.registerHandler(handle4)

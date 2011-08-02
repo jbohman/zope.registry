@@ -1,4 +1,12 @@
 import unittest
+import sys
+
+if sys.version_info[0] == 3:
+    def _u(s):
+        return s
+else:
+    def _u(s):
+        return unicode(s, 'unicode_escape')
 
 class Test(unittest.TestCase):
 
@@ -58,16 +66,16 @@ class Test(unittest.TestCase):
         test_object2 = self.tests.U12(2)
         test_object3 = self.tests.U12(3)
         self.components.registerUtility(test_object1)
-        self.components.registerUtility(test_object3, self.tests.I2, u'name')
+        self.components.registerUtility(test_object3, self.tests.I2, _u('name'))
         self.components.registerUtility(test_object2, self.tests.I2)
 
         sorted_utilities = sorted(self.components.registeredUtilities())
-        sorted_utilities_name = map(lambda x: getattr(x, 'name'), sorted_utilities)
-        sorted_utilities_component = map(lambda x: getattr(x, 'component'), sorted_utilities)
-        sorted_utilities_provided = map(lambda x: getattr(x, 'provided'), sorted_utilities)
+        sorted_utilities_name = list(map(lambda x: getattr(x, 'name'), sorted_utilities))
+        sorted_utilities_component = list(map(lambda x: getattr(x, 'component'), sorted_utilities))
+        sorted_utilities_provided = list(map(lambda x: getattr(x, 'provided'), sorted_utilities))
 
         self.assertEqual(len(sorted_utilities), 3)
-        self.assertEqual(sorted_utilities_name, [u'', u'', u'name'])
+        self.assertEqual(sorted_utilities_name, [_u(''), _u(''), _u('name')])
         self.assertEqual(sorted_utilities_component, [test_object1, test_object2, test_object3])
         self.assertEqual(sorted_utilities_provided, [self.tests.I1, self.tests.I2, self.tests.I2])
 
@@ -78,10 +86,10 @@ class Test(unittest.TestCase):
         test_object4 = self.tests.U1(4)
         self.components.registerUtility(test_object1)
         self.components.registerUtility(test_object2, self.tests.I2)
-        self.components.registerUtility(test_object3, self.tests.I2, u'name')
+        self.components.registerUtility(test_object3, self.tests.I2, _u('name'))
         self.assertEqual(self.components.getUtility(self.tests.I1), test_object1)
 
-        self.components.registerUtility(test_object4, info=u'use 4 now')
+        self.components.registerUtility(test_object4, info=_u('use 4 now'))
         self.assertEqual(self.components.getUtility(self.tests.I1), test_object4)
 
     def test_unregister_utility(self):
@@ -105,12 +113,12 @@ class Test(unittest.TestCase):
         test_object3 = self.tests.U12(3)
         self.components.registerUtility(test_object1)
         self.components.registerUtility(test_object2, self.tests.I2)
-        self.components.registerUtility(test_object3, self.tests.I2, u'name')
+        self.components.registerUtility(test_object3, self.tests.I2, _u('name'))
 
         sorted_utilities = sorted(self.components.getUtilitiesFor(self.tests.I2))
         self.assertEqual(len(sorted_utilities), 2)
-        self.assertEqual(sorted_utilities[0], (u'', test_object2))
-        self.assertEqual(sorted_utilities[1], (u'name', test_object3))
+        self.assertEqual(sorted_utilities[0], (_u(''), test_object2))
+        self.assertEqual(sorted_utilities[1], (_u('name'), test_object3))
 
     def test_get_all_utilities_registered_for(self):
         test_object1 = self.tests.U1(1)
@@ -119,13 +127,13 @@ class Test(unittest.TestCase):
         test_object4 = self.tests.U('ext')
         self.components.registerUtility(test_object1)
         self.components.registerUtility(test_object2, self.tests.I2)
-        self.components.registerUtility(test_object3, self.tests.I2, u'name')
+        self.components.registerUtility(test_object3, self.tests.I2, _u('name'))
         self.components.registerUtility(test_object4, self.tests.I2e)
 
         sorted_utilities = sorted(self.components.getUtilitiesFor(self.tests.I2))
         self.assertEqual(len(sorted_utilities), 2)
-        self.assertEqual(sorted_utilities[0], (u'', test_object2))
-        self.assertEqual(sorted_utilities[1], (u'name', test_object3))
+        self.assertEqual(sorted_utilities[0], (_u(''), test_object2))
+        self.assertEqual(sorted_utilities[1], (_u('name'), test_object3))
 
         all_utilities = self.components.getAllUtilitiesRegisteredFor(self.tests.I2)
         self.assertEqual(len(all_utilities), 3)

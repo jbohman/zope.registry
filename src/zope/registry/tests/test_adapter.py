@@ -1,7 +1,15 @@
 import unittest
+import sys
 
 from zope.interface import implementedBy
 from zope.registry import ComponentLookupError
+
+if sys.version_info[0] == 3:
+    def _u(s):
+        return s
+else:
+    def _u(s):
+        return unicode(s, 'unicode_escape')
 
 class Test(unittest.TestCase):
 
@@ -51,7 +59,7 @@ class Test(unittest.TestCase):
         self.assertTrue(self.components.unregisterAdapter(self.tests.A_2, required=[self.tests.I3]))
 
     def test_register_and_unregister_class_specific(self):
-        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=u'Really class specific')
+        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=_u('Really class specific'))
         self.assertTrue(self.components.unregisterAdapter(required=[self.tests.U], provided=self.tests.IA3))
       
     def test_registered_adapters_and_sorting(self):
@@ -59,16 +67,16 @@ class Test(unittest.TestCase):
         self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.A12_, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.A_2, required=[self.tests.I3])
-        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=u'Really class specific')
+        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=_u('Really class specific'))
 
         sorted_adapters = sorted(self.components.registeredAdapters())
-        sorted_adapters_name = map(lambda x: getattr(x, 'name'), sorted_adapters)
-        sorted_adapters_provided = map(lambda x: getattr(x, 'provided'), sorted_adapters) 
-        sorted_adapters_required = map(lambda x: getattr(x, 'required'), sorted_adapters)
-        sorted_adapters_info = map(lambda x: getattr(x, 'info'), sorted_adapters)
+        sorted_adapters_name = list(map(lambda x: getattr(x, 'name'), sorted_adapters))
+        sorted_adapters_provided = list(map(lambda x: getattr(x, 'provided'), sorted_adapters))
+        sorted_adapters_required = list(map(lambda x: getattr(x, 'required'), sorted_adapters))
+        sorted_adapters_info = list(map(lambda x: getattr(x, 'info'), sorted_adapters))
 
         self.assertEqual(len(sorted_adapters), 5)
-        self.assertEqual(sorted_adapters_name, [u'', u'', u'', u'', u''])
+        self.assertEqual(sorted_adapters_name, [_u(''), _u(''), _u(''), _u(''), _u('')])
         self.assertEqual(sorted_adapters_provided, [self.tests.IA1,
                                                     self.tests.IA2,
                                                     self.tests.IA2,
@@ -80,7 +88,7 @@ class Test(unittest.TestCase):
                                                     (self.tests.I1,),
                                                     (self.tests.I3,),
                                                     (implementedBy(self.tests.U),)])
-        self.assertEqual(sorted_adapters_info, [u'', u'', u'', u'', u'Really class specific'])
+        self.assertEqual(sorted_adapters_info, [_u(''), _u(''), _u(''), _u(''), _u('Really class specific')])
 
     def test_get_none_existing_adapter(self):
         self.assertRaises(ComponentLookupError, self.components.getMultiAdapter, (self.tests.U(1),), self.tests.IA1)
@@ -98,46 +106,46 @@ class Test(unittest.TestCase):
         self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.A12_, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.A_2, required=[self.tests.I3])
-        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=u'Really class specific')
+        self.components.registerAdapter(self.tests.A_3, required=[self.tests.U], info=_u('Really class specific'))
 
         self.assertTrue(self.components.unregisterAdapter(self.tests.A12_1))
         self.assertTrue(self.components.unregisterAdapter(required=[self.tests.U], provided=self.tests.IA3))
 
         sorted_adapters = sorted(self.components.registeredAdapters())
-        sorted_adapters_name = map(lambda x: getattr(x, 'name'), sorted_adapters)
-        sorted_adapters_provided = map(lambda x: getattr(x, 'provided'), sorted_adapters) 
-        sorted_adapters_required = map(lambda x: getattr(x, 'required'), sorted_adapters)
-        sorted_adapters_info = map(lambda x: getattr(x, 'info'), sorted_adapters)
+        sorted_adapters_name = list(map(lambda x: getattr(x, 'name'), sorted_adapters))
+        sorted_adapters_provided = list(map(lambda x: getattr(x, 'provided'), sorted_adapters))
+        sorted_adapters_required = list(map(lambda x: getattr(x, 'required'), sorted_adapters))
+        sorted_adapters_info = list(map(lambda x: getattr(x, 'info'), sorted_adapters))
 
         self.assertEqual(len(sorted_adapters), 3)
-        self.assertEqual(sorted_adapters_name, [u'', u'', u''])
+        self.assertEqual(sorted_adapters_name, [_u(''), _u(''), _u('')])
         self.assertEqual(sorted_adapters_provided, [self.tests.IA2,
                                                     self.tests.IA2,
                                                     self.tests.IA2])
         self.assertEqual(sorted_adapters_required, [(self.tests.I1, self.tests.I2),
                                                     (self.tests.I1,),
                                                     (self.tests.I3,)])
-        self.assertEqual(sorted_adapters_info, [u'', u'', u''])
+        self.assertEqual(sorted_adapters_info, [_u(''), _u(''), _u('')])
 
     def test_register_named_adapter(self):
-        self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2, name=u'test')
+        self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2, name=_u('test'))
         self.assertTrue(self.components.queryMultiAdapter((self.tests.U1(1),), self.tests.IA2) is None)
-        self.assertEqual(repr(self.components.queryMultiAdapter((self.tests.U1(1),), self.tests.IA2, name=u'test')), 'A1_12(U1(1))')
+        self.assertEqual(repr(self.components.queryMultiAdapter((self.tests.U1(1),), self.tests.IA2, name=_u('test'))), 'A1_12(U1(1))')
 
         self.assertTrue(self.components.queryAdapter(self.tests.U1(1), self.tests.IA2) is None)
-        self.assertEqual(repr(self.components.queryAdapter(self.tests.U1(1), self.tests.IA2, name=u'test')), 'A1_12(U1(1))')
-        self.assertEqual(repr(self.components.getAdapter(self.tests.U1(1), self.tests.IA2, name=u'test')), 'A1_12(U1(1))')
+        self.assertEqual(repr(self.components.queryAdapter(self.tests.U1(1), self.tests.IA2, name=_u('test'))), 'A1_12(U1(1))')
+        self.assertEqual(repr(self.components.getAdapter(self.tests.U1(1), self.tests.IA2, name=_u('test'))), 'A1_12(U1(1))')
 
     def test_get_adapters(self):
-        self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA1, name=u'test 1')
-        self.components.registerAdapter(self.tests.A1_23, provided=self.tests.IA2, name=u'test 2')
+        self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA1, name=_u('test 1'))
+        self.components.registerAdapter(self.tests.A1_23, provided=self.tests.IA2, name=_u('test 2'))
         self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2)
 
         adapters = list(self.components.getAdapters((self.tests.U1(1),), self.tests.IA2))
         self.assertEqual(len(adapters), 2)
-        self.assertEqual(adapters[0][0], u'test 2')
-        self.assertEqual(adapters[1][0], u'')
+        self.assertEqual(adapters[0][0], _u('test 2'))
+        self.assertEqual(adapters[1][0], _u(''))
         self.assertEqual(repr(adapters[0][1]), 'A1_23(U1(1))')
         self.assertEqual(repr(adapters[1][1]), 'A1_12(U1(1))')
 
@@ -145,27 +153,27 @@ class Test(unittest.TestCase):
         self.components.registerAdapter(self.tests.A1_12, provided=self.tests.IA2)
         self.components.registerAdapter(self.tests.noop, 
                                         required=[self.tests.IA1], provided=self.tests.IA2, 
-                                        name=u'test noop')
+                                        name=_u('test noop'))
 
-        self.assertTrue(self.components.queryAdapter(self.tests.U1(9), self.tests.IA2, name=u'test noop') is None)
+        self.assertTrue(self.components.queryAdapter(self.tests.U1(9), self.tests.IA2, name=_u('test noop')) is None)
         adapters = list(self.components.getAdapters((self.tests.U1(1),), self.tests.IA2))
         self.assertEqual(len(adapters), 1)
-        self.assertEqual(adapters[0][0], u'')
+        self.assertEqual(adapters[0][0], _u(''))
         self.assertEqual(repr(adapters[0][1]), 'A1_12(U1(1))')
 
         self.assertTrue(self.components.unregisterAdapter(self.tests.A1_12, provided=self.tests.IA2))
 
         sorted_adapters = sorted(self.components.registeredAdapters())
-        sorted_adapters_name = map(lambda x: getattr(x, 'name'), sorted_adapters)
-        sorted_adapters_provided = map(lambda x: getattr(x, 'provided'), sorted_adapters) 
-        sorted_adapters_required = map(lambda x: getattr(x, 'required'), sorted_adapters)
-        sorted_adapters_info = map(lambda x: getattr(x, 'info'), sorted_adapters)
+        sorted_adapters_name = list(map(lambda x: getattr(x, 'name'), sorted_adapters))
+        sorted_adapters_provided = list(map(lambda x: getattr(x, 'provided'), sorted_adapters))
+        sorted_adapters_required = list(map(lambda x: getattr(x, 'required'), sorted_adapters))
+        sorted_adapters_info = list(map(lambda x: getattr(x, 'info'), sorted_adapters))
 
         self.assertEqual(len(sorted_adapters), 1)
-        self.assertEqual(sorted_adapters_name, [u'test noop'])
+        self.assertEqual(sorted_adapters_name, [_u('test noop')])
         self.assertEqual(sorted_adapters_provided, [self.tests.IA2])
         self.assertEqual(sorted_adapters_required, [(self.tests.IA1,)])
-        self.assertEqual(sorted_adapters_info, [u''])
+        self.assertEqual(sorted_adapters_info, [_u('')])
 
 
 def test_suite():

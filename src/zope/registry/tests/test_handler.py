@@ -1,6 +1,14 @@
 import unittest
+import sys
 
 from zope.interface import implementedBy
+
+if sys.version_info[0] == 3:
+    def _u(s):
+        return s
+else:
+    def _u(s):
+        return unicode(s, 'unicode_escape')
 
 class Test(unittest.TestCase):
 
@@ -19,7 +27,7 @@ class Test(unittest.TestCase):
         def handle1(x):
             self.assertEqual(x, test_object1)
 
-        self.components.registerHandler(handle1, info=u'First handler')
+        self.components.registerHandler(handle1, info=_u('First handler'))
         self.components.handle(test_object1)
 
         @registry.adapter(self.tests.I1, self.tests.I2)
@@ -36,8 +44,8 @@ class Test(unittest.TestCase):
             handle_calls.append(objects)
 
         self.assertRaises(TypeError, self.components.registerHandler, handle)
-        self.components.registerHandler(handle, required=[self.tests.I1], info=u'a comment')
-        self.components.registerHandler(handle, required=[self.tests.U], info=u'handle a class')
+        self.components.registerHandler(handle, required=[self.tests.I1], info=_u('a comment'))
+        self.components.registerHandler(handle, required=[self.tests.U], info=_u('handle a class'))
 
         test_object = self.tests.U1(1)
         self.components.handle(test_object)
@@ -63,20 +71,20 @@ class Test(unittest.TestCase):
         def handle(*objects):
             handle_calls.append(objects)
 
-        self.components.registerHandler(handle1, info=u'First handler')
+        self.components.registerHandler(handle1, info=_u('First handler'))
         self.components.registerHandler(handle12)
-        self.components.registerHandler(handle, required=[self.tests.I1], info=u'a comment')
-        self.components.registerHandler(handle, required=[self.tests.U], info=u'handle a class')
+        self.components.registerHandler(handle, required=[self.tests.I1], info=_u('a comment'))
+        self.components.registerHandler(handle, required=[self.tests.U], info=_u('handle a class'))
 
         handlers = list(self.components.registeredHandlers())
-        handlers_required = map(lambda x: getattr(x, 'required'), handlers)
-        handlers_handler = map(lambda x: getattr(x, 'handler'), handlers)
-        handlers_info = map(lambda x: getattr(x, 'info'), handlers)
+        handlers_required = list(map(lambda x: getattr(x, 'required'), handlers))
+        handlers_handler = list(map(lambda x: getattr(x, 'handler'), handlers))
+        handlers_info = list(map(lambda x: getattr(x, 'info'), handlers))
 
         self.assertEqual(len(handlers), 4)
         self.assertEqual(handlers_required, [(self.tests.I1,), (self.tests.I1, self.tests.I2), (self.tests.I1,), (implementedBy(self.tests.U),)])
         self.assertEqual(handlers_handler, [handle1, handle12, handle, handle])
-        self.assertEqual(handlers_info, [u'First handler', u'', u'a comment', u'handle a class'])
+        self.assertEqual(handlers_info, [_u('First handler'), _u(''), _u('a comment'), _u('handle a class')])
 
     def test_unregister_handler(self):
         from zope import registry
@@ -97,10 +105,10 @@ class Test(unittest.TestCase):
         def handle(*objects):
             handle_calls.append(objects)
 
-        self.components.registerHandler(handle1, info=u'First handler')
+        self.components.registerHandler(handle1, info=_u('First handler'))
         self.components.registerHandler(handle12)
-        self.components.registerHandler(handle, required=[self.tests.I1], info=u'a comment')
-        self.components.registerHandler(handle, required=[self.tests.U], info=u'handle a class')
+        self.components.registerHandler(handle, required=[self.tests.I1], info=_u('a comment'))
+        self.components.registerHandler(handle, required=[self.tests.U], info=_u('handle a class'))
 
         self.assertEqual(len(list(self.components.registeredHandlers())), 4)
         self.assertTrue(self.components.unregisterHandler(handle12))
@@ -135,7 +143,9 @@ class Test(unittest.TestCase):
             calls.append(3)
 
         class Event(object):
-            interface.implements(I)
+            pass
+
+        Event = interface.implementer(I)(Event)
 
         self.components.registerHandler(factory1, [I,])
         self.components.registerHandler(factory2, [I,])

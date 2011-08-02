@@ -20,8 +20,8 @@ from zope.event import notify
 
 from zope.interface import Interface
 from zope.interface import implementedBy
-from zope.interface import implements
-from zope.interface import implementsOnly
+from zope.interface import implementer
+from zope.interface import implementer_only
 from zope.interface import providedBy
 from zope.interface.adapter import AdapterRegistry
 from zope.interface.interfaces import ISpecification
@@ -52,8 +52,6 @@ else:
     string_types = (basestring,)
 
 class Components(object):
-
-    implements(IComponents)
 
     def __init__(self, name='', bases=()):
         assert isinstance(name, string_types)
@@ -393,6 +391,7 @@ class Components(object):
     def handle(self, *objects):
         self.adapters.subscribers(objects, None)
 
+Components = implementer(IComponents)(Components)
 
 def _getUtilityProvided(component):
     provided = list(providedBy(component))
@@ -437,10 +436,7 @@ def _getAdapterRequired(factory, required):
         result.append(r)
     return tuple(result)
 
-
 class UtilityRegistration(object):
-
-    implements(IUtilityRegistration)
 
     def __init__(self, registry, provided, name, component, doc, factory=None):
         (self.registry, self.provided, self.name, self.component, self.info,
@@ -477,9 +473,9 @@ class UtilityRegistration(object):
     def __ge__(self, other):
         return repr(self) >= repr(other)
 
-class AdapterRegistration(object):
+UtilityRegistration = implementer(IUtilityRegistration)(UtilityRegistration)
 
-    implements(IAdapterRegistration)
+class AdapterRegistration(object):
 
     def __init__(self, registry, required, provided, name, component, doc):
         (self.registry, self.required, self.provided, self.name,
@@ -516,13 +512,15 @@ class AdapterRegistration(object):
     def __ge__(self, other):
         return repr(self) >= repr(other)
 
-class SubscriptionRegistration(AdapterRegistration):
+AdapterRegistration = implementer(IAdapterRegistration)(AdapterRegistration)
 
-    implementsOnly(ISubscriptionAdapterRegistration)
+class SubscriptionRegistration(AdapterRegistration):
+    pass
+
+SubscriptionRegistration = implementer_only(ISubscriptionAdapterRegistration)\
+                                           (SubscriptionRegistration)
 
 class HandlerRegistration(AdapterRegistration):
-
-    implementsOnly(IHandlerRegistration)
 
     def __init__(self, registry, required, name, handler, doc):
         (self.registry, self.required, self.name, self.handler, self.info
@@ -543,3 +541,5 @@ class HandlerRegistration(AdapterRegistration):
             getattr(self.factory, '__name__', repr(self.factory)), self.info,
             )
 
+HandlerRegistration = implementer_only(IHandlerRegistration)\
+                                      (HandlerRegistration)

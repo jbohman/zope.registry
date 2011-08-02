@@ -18,7 +18,7 @@ import sys
 
 from zope.interface import Attribute
 from zope.interface import Interface
-from zope.interface import implements
+from zope.interface import implementer
 
 if sys.version_info[0] == 3:
     def _u(s):
@@ -46,12 +46,12 @@ class IObjectEvent(Interface):
 
     object = Attribute("The subject of the event.")
 
-
 class ObjectEvent(object):
-    implements(IObjectEvent)
 
     def __init__(self, object):
         self.object = object
+
+ObjectEvent = implementer(IObjectEvent)(ObjectEvent)
 
 class IComponentArchitecture(Interface):
     """The Component Architecture is defined by two key components: Adapters
@@ -569,26 +569,35 @@ class IRegistrationEvent(IObjectEvent):
 class RegistrationEvent(ObjectEvent):
     """There has been a change in a registration
     """
-    implements(IRegistrationEvent)
 
     def __repr__(self):
         return "%s event:\n%r" % (self.__class__.__name__, self.object)
 
+RegistrationEvent = implementer(IRegistrationEvent)(RegistrationEvent)
+
 class IRegistered(IRegistrationEvent):
     """A component or factory was registered
     """
+    pass
 
 class Registered(RegistrationEvent):
-    implements(IRegistered)
+    """A component or factory was registered
+    """
+    pass
+
+Registered = implementer(IRegistered)(Registered)
 
 class IUnregistered(IRegistrationEvent):
     """A component or factory was unregistered
     """
+    pass
 
 class Unregistered(RegistrationEvent):
     """A component or factory was unregistered
     """
-    implements(IUnregistered)
+    pass
+
+Unregistered = implementer(IUnregistered)(Unregistered)
 
 class IComponentRegistry(Interface):
     """Register components
